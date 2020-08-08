@@ -20,6 +20,7 @@ def page(title, content):
         <title>{title}</title>
         <style>
             html, body, div, ul, li, a, input, button {{
+                display: grid;
                 font-family: monospace;
                 margin: 0;
                 padding: 0;
@@ -29,6 +30,7 @@ def page(title, content):
 
             html{{ font-size: 60%; padding: 1em;}}
             input, button {{ border: 2px solid #000; padding: .5em; }}
+            ul{{ list-style: decimal; margin-left: 2em}}
 
             @media screen 
                 and (min-width: 0px)
@@ -49,7 +51,9 @@ def page(title, content):
                 and (min-width: 1001px)
             {{ html {{ font-size: 2em; }} }}
 
-            ul{{ list-style: decimal; margin-left: 2em}}
+            body{{
+                justify-items: center;
+            }}
         </style>
     </head>
     <body>
@@ -141,5 +145,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, filename=logfile_path)
     log = logging.getLogger(os.path.basename(__file__))
     
-    app.run(host='192.168.1.222', debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=True, port=5000)
 
