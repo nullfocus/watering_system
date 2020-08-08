@@ -1,10 +1,12 @@
 from flask import Flask, request, redirect
 from functools import wraps
 import logging, os
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
 active_id = 0
+gpio_pins = [7, 11, 13, 15]
 
 def logged(f):
     @wraps(f)
@@ -62,21 +64,17 @@ def page(title, content):
 </html>
 '''
 
-def ids_except(id):
-    allIds = [1,2,3,4]
-    allIds.remove(int(id))
-
-    return allIds
-
-def turn_off(ids):
-    #turn off all ids
-    log.debug('turning off ' + ' '.join(map(str, ids)))
-    return
+def turn_off():
+    global gpio_pins
+    
+    log.debug('turning off all')
+    GPIO.output(gpio_pins,GPIO.HIGH)
 
 def turn_on(id):
-    #turn on id
-    log.debug('turning on ' + str(id))
-    return
+    global gpio_pins
+    
+    log.debug('turning on ' + str(id))    
+    GPIO.output(gpio_pins[id],GPIO.LOW)
 
 @app.route('/activate/<id>')
 @logged
@@ -85,7 +83,7 @@ def activate(id):
 
     active_id = int(id)
 
-    turn_off(ids_except(active_id))
+    turn_off()
     turn_on(active_id)
 
     return redirect('/', code=302)
@@ -96,7 +94,7 @@ def deactivate(id):
     global active_id
 
     active_id = 0
-    turn_off([1,2,3,4])
+    turn_off()
 
     return redirect('/', code=302)
 
@@ -137,7 +135,11 @@ def all_exception_handler(error):
     log.debug(error)
     return 'Error', 500
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(gpio_pins,GPIO.OUT)
+    GPIO.output(gpio_pins,GPIO.HIGH)
+
     filepath = os.path.dirname(os.path.realpath(__name__))
 
     logfile_path = filepath + '/log.txt'
