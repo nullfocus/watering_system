@@ -5,8 +5,10 @@ import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
-active_id = 0
-gpio_pins = [7, 11, 13, 15]
+gpio_in_counter=0
+gpio_out_active_id = 0
+gpio_in_pin = 8
+gpio_out_pins = [7, 11, 13, 15]
 
 def logged(f):
     @wraps(f)
@@ -64,36 +66,41 @@ def page(title, content):
 </html>
 '''
 
+def gpio_in_handler(input):
+    global gpio_in_counter
+    gpio_in_counter += 1
+
 def turn_off():
-    global gpio_pins
+    global gpio_out_pins
     
     log.debug('turning off all')
-    GPIO.output(gpio_pins,GPIO.HIGH)
+    GPIO.output(gpio_out_pins,GPIO.HIGH)
 
 def turn_on(id):
-    global gpio_pins
+    global gpio_out_pins
     
-    log.debug('turning on ' + str(id))    
+    log.debug('turning on ' + str(id))
     GPIO.output(gpio_pins[id-1],GPIO.LOW)
 
 @app.route('/activate/<id>')
 @logged
 def activate(id):
-    global active_id
+    global gpio_out_active_id, gpio_in_counter
 
-    active_id = int(id)
+    gpio_out_active_id = int(id)
+    gpio_in_counter = 0
 
     turn_off()
-    turn_on(active_id)
+    turn_on(gpio_out_active_id)
 
     return redirect('/', code=302)
 
 @app.route('/deactivate/<id>')
 @logged
 def deactivate(id):
-    global active_id
+    global gpio_out_active_id
 
-    active_id = 0
+    gpio_out_active_id = 0
     turn_off()
 
     return redirect('/', code=302)
@@ -101,7 +108,7 @@ def deactivate(id):
 @app.route('/')
 @logged
 def index():
-    global active_id
+    global gpio_out_active_id, gpio_in_counter
     content = f'''
 <h1>WATERING SYSTEM</h1>
 '''
@@ -109,10 +116,14 @@ def index():
     for id in [1,2,3,4]:
         content += f'''
 <div>
-    <form action="/{'activate' if id != active_id else 'deactivate'}/{id}">
-        <button type="submit">{'Start' if id != active_id else 'Stop'} {id}</button>
+    <form action="/{'activate' if id != gpio_out_active_id else 'deactivate'}/{id}">
+        <button type="submit">{'Start' if id != gpio_out_active_id else 'Stop'} {id}</button>
     </form>
 </div>
+'''
+
+    content += f'''
+<div>{{gpio_in_counter}}</div>
 '''
 
     return page('watering system', content)
@@ -136,11 +147,15 @@ def all_exception_handler(error):
     return 'Error', 500
 
 if __name__ == '__main__':
+
     try:
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(gpio_pins,GPIO.OUT)
-        GPIO.output(gpio_pins,GPIO.HIGH)
 
+        GPIO.setup(gpio_in_pin,GPIO.IN)
+        GPIO.add_event_detect(gpio_in_pin, GPIO.RISING, callback=gpio_in_handler)
+
+        GPIO.setup(gpio_out_pins,GPIO.OUT)
+        GPIO.output(gpio_out_pins,GPIO.HIGH)
         filepath = os.path.dirname(os.path.realpath(__name__))
 
         logfile_path = filepath + '/log.txt'
