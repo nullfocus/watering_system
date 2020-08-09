@@ -74,7 +74,7 @@ def turn_on(id):
     global gpio_pins
     
     log.debug('turning on ' + str(id))    
-    GPIO.output(gpio_pins[id],GPIO.LOW)
+    GPIO.output(gpio_pins[id-1],GPIO.LOW)
 
 @app.route('/activate/<id>')
 @logged
@@ -135,17 +135,22 @@ def all_exception_handler(error):
     log.debug(error)
     return 'Error', 500
 
-if __name__ == '__main__':    
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(gpio_pins,GPIO.OUT)
-    GPIO.output(gpio_pins,GPIO.HIGH)
+if __name__ == '__main__':
+    try:
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(gpio_pins,GPIO.OUT)
+        GPIO.output(gpio_pins,GPIO.HIGH)
 
-    filepath = os.path.dirname(os.path.realpath(__name__))
+        filepath = os.path.dirname(os.path.realpath(__name__))
 
-    logfile_path = filepath + '/log.txt'
+        logfile_path = filepath + '/log.txt'
 
-    logging.basicConfig(level=logging.DEBUG, filename=logfile_path)
-    log = logging.getLogger(os.path.basename(__file__))
-    
-    app.run(host='0.0.0.0', debug=True, port=5000)
+        logging.basicConfig(level=logging.DEBUG, filename=logfile_path)
+        log = logging.getLogger(os.path.basename(__file__))
+        
+        app.run(host='0.0.0.0', debug=True, port=5000)
+    finally:
+        GPIO.output(gpio_pins,GPIO.HIGH)
+        GPIO.cleanup()
+        
 
