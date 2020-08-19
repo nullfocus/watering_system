@@ -5,6 +5,8 @@ import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
+ticks_to_ml = 0.00225
+
 gpio_in_counter=0
 gpio_out_active_id = 0
 gpio_in_pin = 8
@@ -80,7 +82,7 @@ def turn_on(id):
     global gpio_out_pins
     
     log.debug('turning on ' + str(id))
-    GPIO.output(gpio_pins[id-1],GPIO.LOW)
+    GPIO.output(gpio_out_pins[id-1],GPIO.LOW)
 
 @app.route('/activate/<id>')
 @logged
@@ -108,7 +110,7 @@ def deactivate(id):
 @app.route('/')
 @logged
 def index():
-    global gpio_out_active_id, gpio_in_counter
+    global gpio_out_active_id
     content = f'''
 <h1>WATERING SYSTEM</h1>
 '''
@@ -123,10 +125,30 @@ def index():
 '''
 
     content += f'''
-<div>{{gpio_in_counter}}</div>
+<div id="liters">{current_liters()} liters</div>
+
+<script>
+setInterval(function(){{ 
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", function() {{
+        document.getElementById('liters').innerText = this.responseText;
+    }});
+    oReq.open("GET", "/current_liters");
+    oReq.send();
+}}, 3000);
+</script>
 '''
 
     return page('watering system', content)
+
+def current_liters():
+    global  gpio_in_counter, ticks_to_ml
+    return round(gpio_in_counter*ticks_to_ml, 3)
+
+@app.route('/current_liters')
+@logged
+def get_liters():
+    return f'''{current_liters()} liters'''
 
 @app.route('/favicon.ico')
 @logged
@@ -165,7 +187,7 @@ if __name__ == '__main__':
         
         app.run(host='0.0.0.0', debug=True, port=5000)
     finally:
-        GPIO.output(gpio_pins,GPIO.HIGH)
+        GPIO.output(gpio_out_pins,GPIO.HIGH)
         GPIO.cleanup()
         
 
