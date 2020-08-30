@@ -113,14 +113,22 @@ def index():
     global gpio_out_active_id
     content = f'''
 <h1>WATERING SYSTEM</h1>
+<script>
+var is_active = false;
+</script>
 '''
 
     for id in [1,2,3,4]:
+        id_is_active = (id == gpio_out_active_id)
+        
         content += f'''
 <div>
-    <form action="/{'activate' if id != gpio_out_active_id else 'deactivate'}/{id}">
-        <button type="submit">{'Start' if id != gpio_out_active_id else 'Stop'} {id}</button>
+    <form action="/{'deactivate' if id_is_active else 'activate'}/{id}">
+        <button type="submit">{'Stop' if id_is_active else 'Start'} {id}</button>
     </form>
+    <script>
+        is_active = {'true' if id_is_active else 'false'};
+    </script>
 </div>
 '''
 
@@ -128,14 +136,49 @@ def index():
 <div id="liters">{current_liters()} liters</div>
 
 <script>
+var intervalId = -1;
+var waterCheckInterval = 3000;//ms
+var msDisplayInterval = 32;
+var increment = 0;
+var curNumber = 0;
+var nextNumber = 0;
+
+function setNextNumber(number){{
+
+    if(!is_active){{
+        document.getElementById('liters').innerText = number.toFixed(2) + " liters";
+        nextNumber = number;
+        curNumber = number;
+        return;
+    }}
+
+    nextNumber = number;
+    var increment = ( nextNumber - curNumber) / (waterCheckInterval / msDisplayInterval);
+  
+    clearInterval(intervalId);
+    
+    intervalId = setInterval(function(){{
+        curNumber += increment;
+    
+        if(curNumber >= nextNumber){{
+            clearInterval(intervalId);
+            curNumber = nextNumber;
+        }}
+        
+        
+        document.getElementById('liters').innerText = curNumber.toFixed(2) + " liters";
+        
+    }}, msDisplayInterval);
+}}
+
+
 setInterval(function(){{ 
     var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", function() {{
-        document.getElementById('liters').innerText = this.responseText;
-    }});
+    oReq.addEventListener("load", function() {{ setNextNumber(parseFloat(this.responseText)) }});
     oReq.open("GET", "/current_liters");
     oReq.send();
-}}, 3000);
+}}, waterCheckInterval);
+
 </script>
 '''
 
