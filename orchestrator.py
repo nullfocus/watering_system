@@ -56,26 +56,7 @@ class Orchestrator:
 
     #---------debugging-----------#
     def test(self):
-
-        self.datastore.set_schedule(5, 82, 0)
-        self.datastore.set_schedule(5, 83, 1)
-        self.datastore.set_schedule(5, 84, 2)
-        self.datastore.set_schedule(5, 85, 3)
-
-        if(True):
-            return
-
-
-        self.datastore.create_area(0, 'front lawn')
+        self.datastore.create_area(0, 'back lawn 2')
         self.datastore.create_area(1, 'back lawn 1')
-        self.datastore.create_area(2, 'back lawn 2')
-        self.datastore.create_area(3, 'drip system')
-
-        self.datastore.set_schedule(0, 44, 0)
-        self.datastore.set_schedule(0, 45, 1)
-        self.datastore.set_schedule(0, 46, 2)
-        self.datastore.set_schedule(0, 47, 3)
-        self.datastore.set_schedule(3, 44, 0)
-        self.datastore.set_schedule(3, 45, 1)
-        self.datastore.set_schedule(3, 46, 2)
-        self.datastore.set_schedule(3, 47, 3)
+        self.datastore.create_area(2, 'drip system')
+        self.datastore.create_area(3, 'front lawn')

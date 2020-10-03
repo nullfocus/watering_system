@@ -16,8 +16,8 @@ def start(l, o):
 @app.route('/test/')
 def test():
     global orchestrator
-
     orchestrator.test()
+    return redirect('/status/')
 
 @app.route('/status/')
 def status():
