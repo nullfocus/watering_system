@@ -9,7 +9,7 @@ def start(l, o):
     global log, orchestrator
     log = l
     orchestrator = o
-    app.run(host='0.0.0.0', debug=False, port=5000)
+    app.run(host='0.0.0.0', debug=True, port=5000)
 
 #---api section---
 
@@ -55,25 +55,21 @@ def deactivate():
     orchestrator.deactivate()
     return status()
 
-@app.route('/set_active/<day_of_week>/<time_of_day>/<area>')
-def set_active(day_of_week, time_of_day, area):
+@app.route('/set_schedule/<day_of_week>/<time_of_day>/<area_id>/')
+def set_schedule(day_of_week, time_of_day, area_id):
     global orchestrator
     
-    if area == 'null': 
-        area = None
+    if area_id == 'null': 
+        area_id = None
         
-    id = orchestrator.set_active(day_of_week, time_of_day, area)
-    return jsonify(success = True, active_id = id)
+    orchestrator.set_schedule(day_of_week, time_of_day, area_id)
+    return status()
 
 #---static file section---
 
 @app.route('/')
 def root_redirect():
     return redirect('/status/')
-
-@app.errorhandler(Exception)
-def all_exception_handler(error):
-    return '<html><body><h1>Exception</h1><br/><h3>' + error + '</h3><br/>' + error.description + '</body></html>', 500
 
 @app.route('/favicon.ico')
 def favicon():
