@@ -51,10 +51,8 @@ class DeviceRpi:
 
         self.gpio_out_active_id = id
 
-        if id is None:
-            return self.gpio_out_active_id
-
-        self.log(f"turning on {id}")
-        GPIO.output(GPIO_OUT_PINS, GPIO.LOW)
+        if id is not None:
+            self.log(f"turning on {id}")
+            GPIO.output(GPIO_OUT_PINS[int(id)], GPIO.LOW)
 
         return self.gpio_out_active_id
