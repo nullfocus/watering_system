@@ -54,9 +54,13 @@ class Orchestrator:
         self.automatic_orchestrator.set_schedule(day_of_week, time_of_day, area_id)
 
 
-    #---------debugging-----------#
+    #---------initial configuration-----------#
     def test(self):
-        self.datastore.create_area(0, 'back lawn 2')
-        self.datastore.create_area(1, 'back lawn 1')
-        self.datastore.create_area(2, 'drip system')
-        self.datastore.create_area(3, 'front lawn')
+        self.datastore.create_area(0, 'area 1')
+        self.datastore.create_area(1, 'area 2')
+        self.datastore.create_area(2, 'area 3')
+        self.datastore.create_area(3, 'area 4')
+        self.datastore.create_area(4, 'area 5')
+        self.datastore.create_area(5, 'area 6')
+        self.datastore.create_area(6, 'area 7')
+        self.datastore.create_area(7, 'area 8')

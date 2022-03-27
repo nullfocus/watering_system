@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 
 TICKS_TO_ML = 0.00225
 GPIO_IN_PIN = 8
-GPIO_OUT_PINS = [7, 11, 13, 15]
+GPIO_OUT_PINS = [7, 11, 13, 15, 29, 31, 33, 35]
 
 class DeviceRpi:
     def __init__(self, log):
